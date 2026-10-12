@@ -9,6 +9,7 @@ from config import (ADVERSARIAL_SET_PATH, ANSWERS_PATH, ARTIFACTS_DIR, CLEAN_SET
                     HUMAN_LABELS_PATH, OUTPUT_SET_PATH, PAIR_QUESTION_IDS, TEST_SET_PATH)
 from src.experiment_support import (JUDGE_MODEL, generation_models, guard_models, judge_binary,
                                     metadata, model_ids, read_json, write_json)
+from src.llm_provider import create_client, resolve_llm_provider
 from src.report_contracts import PAIR_SOURCES, validate_answers, validate_phase_a, validate_phase_b, validate_phase_c
 
 
@@ -52,8 +53,8 @@ def run_phase_b():
             reference=q["ground_truth"])
         results.append({"question_id": qid, **asdict(result)})
     judgments = []
-    from openai import OpenAI
-    binary_client = OpenAI()
+    provider = resolve_llm_provider()
+    binary_client = create_client(provider) if provider is not None else None
     for human in humans:
         # Exact supplied answer. Never pass human_label or human_note into judge_binary.
         result = judge_binary(human["question"], human["model_answer"],
@@ -66,7 +67,7 @@ def run_phase_b():
     report = {
         "metadata": metadata([ANSWERS_PATH, TEST_SET_PATH, HUMAN_LABELS_PATH], models={
             "generation": generation_models(answers), "evaluator": [],
-            "judge": [phase.JUDGE_MODEL, JUDGE_MODEL], "guard": []}),
+            "judge": [phase.judge_model()], "guard": []}),
         "pair_sources": dict(PAIR_SOURCES),
         "pairwise_results": results, "binary_judgments": judgments,
         "calibration": {"question_ids": [row["question_id"] for row in judgments],

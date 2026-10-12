@@ -9,6 +9,14 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 HF_TOKEN = os.getenv("HF_TOKEN", "")  # Optional: for HuggingFace models
 
+# --- OpenCode Go provider (OpenAI-compatible chat completions) ---
+# Used for answer generation and M5 enrichment when OPENCODE_GO_API_KEY is set.
+OPENCODE_GO_API_KEY = os.getenv("OPENCODE_GO_API_KEY", "")
+OPENCODE_GO_BASE_URL = os.getenv("OPENCODE_GO_BASE_URL", "https://opencode.ai/zen/go/v1")
+OPENCODE_GO_MODEL = os.getenv("OPENCODE_GO_MODEL", "deepseek-v4.1-flash")
+# Stable per-conversation id sent as x-opencode-session (generated when empty).
+OPENCODE_GO_SESSION = os.getenv("OPENCODE_GO_SESSION", "")
+
 # --- Qdrant (same as Day 18) ---
 QDRANT_HOST = "localhost"
 QDRANT_PORT = 6333

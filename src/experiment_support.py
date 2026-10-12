@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from config import JUDGE_MODEL, LATENCY_BUDGET_P95_MS
+from src.llm_provider import create_client, resolve_llm_provider
 
 
 def read_json(path):
@@ -105,13 +106,19 @@ Trả JSON: {"label": 0 hoặc 1, "reasoning": "giải thích ngắn theo tiêu 
 """
 
 
-def judge_binary(question, answer, reference, *, client=None):
+def judge_binary(question, answer, reference, *, client=None, model=None):
     """Provided bridge to 0/1 calibration. Never accepts human_label/human_note."""
+    provider = resolve_llm_provider() if (client is None or model is None) else None
     if client is None:
-        from openai import OpenAI
-        client = OpenAI()
+        if provider is None:
+            from openai import OpenAI
+            client = OpenAI()
+        else:
+            client = create_client(provider)
+    if model is None:
+        model = provider.model if provider is not None else JUDGE_MODEL
     response = client.chat.completions.create(
-        model=JUDGE_MODEL, temperature=0,
+        model=model, temperature=0,
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": BINARY_SYSTEM_PROMPT},

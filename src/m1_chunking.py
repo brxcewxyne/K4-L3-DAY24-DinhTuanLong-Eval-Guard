@@ -163,7 +163,7 @@ def chunk_hierarchical(
     parents: list[Chunk] = []
     children: list[Chunk] = []
     source = str(metadata.get("source", "unknown"))
-    prefix = f"Nguá»n: {source}\n" if source != "unknown" else ""
+    prefix = f"Nguồn: {source}\n" if source != "unknown" else ""
     content_limit = child_size - len(prefix)
     if content_limit <= 0:
         raise ValueError("Source name leaves no room for child content")
